@@ -1,0 +1,27 @@
+$Id: README 1741 2004-12-31 23:48:51Z btrott $
+
+This is URI::Fetch, a class to intelligently fetch syndication feeds.
+
+PREREQUISITES
+
+    * Class::ErrorHandler
+    * LWP
+    * URI
+
+INSTALLATION
+
+URI::Fetch installation is straightforward. If your CPAN shell
+is set up, you should just be able to do
+
+    % perl -MCPAN -e 'install URI::Fetch'
+
+Download it, unpack it, then build it as per the usual:
+
+    % perl Makefile.PL
+    % make && make test
+
+Then install it:
+
+    % make install
+
+Benjamin Trott / ben+cpan@stupidfool.org

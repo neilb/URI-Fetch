@@ -1,0 +1,19 @@
+name: URI-Fetch
+version: 0.01
+abstract: Smart URI fetching (for syndication feeds, in particular)
+author: Benjamin Trott <ben+cpan@stupidfool.org>
+license: perl
+distribution_type: module
+requires:
+  Class::ErrorHandler: 0
+  LWP: 0
+  URI: 0
+recommends:
+  Compress::Zlib: 0
+  Cache: 0
+  Storable: 0
+no_index:
+  directory:
+    - t
+    - inc
+generated_by: Module::Install version 0.36
