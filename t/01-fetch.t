@@ -1,7 +1,7 @@
-# $Id: 01-fetch.t 1745 2005-01-01 00:39:49Z btrott $
+# $Id: 01-fetch.t 1835 2005-05-25 22:52:11Z btrott $
 
 use strict;
-use Test::More tests => 39;
+use Test::More tests => 47;
 use URI::Fetch;
 
 use constant BASE      => 'http://stupidfool.org/perl/feeds/';
@@ -79,6 +79,21 @@ is($res->http_status, 410);
 $res = URI::Fetch->fetch(URI_ERROR);
 ok(!$res);
 ok(URI::Fetch->errstr);
+
+## Test ContentAlterHook, wiping the cache
+$cache = My::Cache->new;
+$res = URI::Fetch->fetch(URI_OK, Cache => $cache, ContentAlterHook => sub { my $cref = shift; $$cref = "ALTERED."; });
+ok($res);
+is($res->http_status, 200);
+ok($etag = $res->etag);
+ok($mtime = $res->last_modified);
+is($res->content, "ALTERED.");
+
+## using the same cache, should still be altered
+$res = URI::Fetch->fetch(URI_OK, Cache => $cache);
+ok($res);
+is($res->http_status, 304);
+is($res->content, "ALTERED.");
 
 package My::Cache;
 sub new { bless {}, shift }

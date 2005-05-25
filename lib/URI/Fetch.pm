@@ -1,14 +1,21 @@
-# $Id: Fetch.pm 1745 2005-01-01 00:39:49Z btrott $
+# $Id: Fetch.pm 1835 2005-05-25 22:52:11Z btrott $
 
 package URI::Fetch;
 use strict;
-
 use base qw( Class::ErrorHandler );
+
 use LWP::UserAgent;
+use Carp qw( croak );
 use URI;
 use URI::Fetch::Response;
+use Storable;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
+
+our $HAS_ZLIB;
+BEGIN {
+    $HAS_ZLIB = eval "use Compress::Zlib (); 1;";
+}
 
 use constant URI_OK                => 200;
 use constant URI_MOVED_PERMANENTLY => 301;
@@ -18,25 +25,35 @@ use constant URI_GONE              => 410;
 sub fetch {
     my $class = shift;
     my($uri, %param) = @_;
-    my $cache = $param{Cache};
+
+    # get user parameters
+    my $cache        = delete $param{Cache};
+    my $ua           = delete $param{UserAgent};
+    my $p_etag       = delete $param{ETag};
+    my $p_lastmod    = delete $param{LastModified};
+    my $content_hook = delete $param{ContentAlterHook};
+    croak("Unknown parameters: " . join(", ", keys %param))
+        if %param;
+
     my $ref;
     if ($cache && (my $blob = $cache->get($uri))) {
-        require Storable;
         $ref = Storable::thaw($blob);
     }
-    my $ua = LWP::UserAgent->new;
+
+    $ua ||= LWP::UserAgent->new;
     $ua->agent(join '/', $class, $class->VERSION);
-    my $has_zlib = eval { require Compress::Zlib };
+
     my $req = HTTP::Request->new(GET => $uri);
-    if ($has_zlib) {
+    if ($HAS_ZLIB) {
         $req->header('Accept-Encoding', 'gzip');
     }
-    if (my $etag = ($param{ETag} || $ref->{ETag})) {
+    if (my $etag = ($p_etag || $ref->{ETag})) {
         $req->header('If-None-Match', $etag);
     }
-    if (my $ts = ($param{LastModified} || $ref->{LastModified})) {
+    if (my $ts = ($p_lastmod || $ref->{LastModified})) {
         $req->if_modified_since($ts);
     }
+
     my $res = $ua->request($req);
     my $feed = URI::Fetch::Response->new;
     $feed->uri($uri);
@@ -66,9 +83,19 @@ sub fetch {
     if ($res->content_encoding && $res->content_encoding eq 'gzip') {
         $content = Compress::Zlib::memGunzip($content);
     }
+
+    # let caller-defined transform hook modify the result that'll be
+    # cached.  perhaps the caller only wants the <head> section of
+    # HTML, or wants to change the content to a parsed datastructure
+    # already serialized with Storable.
+    if ($content_hook) {
+        croak("ContentAlterHook is not a subref") unless ref $content_hook eq "CODE";
+        $content_hook->(\$content);
+    }
+
     $feed->content($content);
+
     if ($cache) {
-        require Storable;
         $cache->set($uri, Storable::freeze({
             ETag         => $feed->etag,
             LastModified => $feed->last_modified,
@@ -94,17 +121,17 @@ URI::Fetch - Smart URI fetching (for syndication feeds, in particular)
         or die URI::Fetch->errstr;
 
     ## Fetch using specified ETag and Last-Modified headers.
-    my $res = URI::Fetch->fetch('http://example.com/atom.xml', {
+    my $res = URI::Fetch->fetch('http://example.com/atom.xml',
             ETag => '123-ABC',
             LastModified => time - 3600,
-    })
+    )
         or die URI::Fetch->errstr;
 
     ## Fetch using an on-disk cache that URI::Fetch manages for you.
     my $cache = Cache::File->new( cache_root => '/tmp/cache' );
-    my $res = URI::Fetch->fetch('http://example.com/atom.xml', {
+    my $res = URI::Fetch->fetch('http://example.com/atom.xml',
             Cache => $cache
-    })
+    )
         or die URI::Fetch->errstr;
 
 =head1 DESCRIPTION
@@ -187,6 +214,25 @@ If supplied, I<URI::Fetch> will store the feed content, ETag, and
 last-modified time of the response in the cache, and will pull the
 content from the cache on subsequent requests if the feed returns a
 Not-Modified response.
+
+=item * UserAgent
+
+Optional.  You may provide your own LWP::UserAgent instance.  Look
+into L<LWPx::ParanoidUserAgent> if you're fetching URLs given to you
+by possibly malicious parties.
+
+=item * ContentAlterHook
+
+Optional.  A subref that gets called with a scalar reference to your
+content so you can modify the content before it's returned and before
+it's put in cache.
+
+For instance, you may want to only cache the E<lt>headE<gt> section of
+an HTML document, or you may want to take a feed URL and cache only a
+pre-parsed version of it.  If you modify the scalarref given to your
+hook and change it into a hashref, scalarref, or some blessed object,
+that same value will be returned to you later on not-modified
+responses.
 
 =back
 

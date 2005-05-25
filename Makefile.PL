@@ -1,9 +1,9 @@
-# $Id: Makefile.PL 1741 2004-12-31 23:48:51Z btrott $
+# $Id: Makefile.PL 1835 2005-05-25 22:52:11Z btrott $
 
 use inc::Module::Install;
 
 name('URI-Fetch');
-abstract('Smart URI fetching (for syndication feeds, in particular)');
+abstract('Smart URI fetching/caching');
 author('Benjamin Trott <ben+cpan@stupidfool.org>');
 version_from('lib/URI/Fetch.pm');
 license('perl');
@@ -15,6 +15,7 @@ include('ExtUtils::AutoInstall');
 requires('Class::ErrorHandler');
 requires('LWP');
 requires('URI');
+requires('Storable'),
 
 features(
     'GZIP Support' => [
@@ -25,7 +26,6 @@ features(
     'Caching Support' => [
         -default => 0,
         recommends('Cache'),
-        recommends('Storable'),
     ],
 );
 

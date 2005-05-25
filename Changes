@@ -1,6 +1,13 @@
-# $Id: Changes 1741 2004-12-31 23:48:51Z btrott $
+# $Id: Changes 1835 2005-05-25 22:52:11Z btrott $
 
 Revision history for URI::Fetch
 
-0.01  2004.12.06
+0.02  2005.05.25
+    - Let the caller pass in their own UserAgent and ContentAlterHook.
+      [bradfitz]
+    - Be more strict about invalid parameters. [bradfitz]
+    - Documentation fixes for URI::Fetch->fetch in the SYNOPSIS. Thanks
+      to Naoya Ito for the note.
+
+0.01  2004.12.31
     - Initial distribution.
