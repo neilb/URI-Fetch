@@ -1,4 +1,4 @@
-# $Id: Fetch.pm 1835 2005-05-25 22:52:11Z btrott $
+# $Id: Fetch.pm 1849 2005-05-27 22:52:01Z btrott $
 
 package URI::Fetch;
 use strict;
@@ -10,7 +10,7 @@ use URI;
 use URI::Fetch::Response;
 use Storable;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 our $HAS_ZLIB;
 BEGIN {
@@ -32,12 +32,29 @@ sub fetch {
     my $p_etag       = delete $param{ETag};
     my $p_lastmod    = delete $param{LastModified};
     my $content_hook = delete $param{ContentAlterHook};
+    my $p_no_net     = delete $param{NoNetwork};
+    my $p_cache_grep = delete $param{CacheEntryGrep};
     croak("Unknown parameters: " . join(", ", keys %param))
         if %param;
 
     my $ref;
     if ($cache && (my $blob = $cache->get($uri))) {
         $ref = Storable::thaw($blob);
+    }
+
+    # NoNetwork support (see pod docs below for logic clarification)
+    if ($p_no_net) {
+        croak("Invalid NoNetworkValue (negative)") if $p_no_net < 0;
+        if ($ref && ($p_no_net == 1 || $ref->{CacheTime} > time() - $p_no_net)) {
+
+            my $fetch = URI::Fetch::Response->new;
+            $fetch->status(URI_OK);
+            $fetch->content($ref->{Content});
+            $fetch->etag($ref->{ETag});
+            $fetch->last_modified($ref->{LastModified});
+            return $fetch;
+        }
+        return undef if $p_no_net == 1;
     }
 
     $ua ||= LWP::UserAgent->new;
@@ -55,30 +72,30 @@ sub fetch {
     }
 
     my $res = $ua->request($req);
-    my $feed = URI::Fetch::Response->new;
-    $feed->uri($uri);
-    $feed->http_status($res->code);
-    $feed->http_response($res);
+    my $fetch = URI::Fetch::Response->new;
+    $fetch->uri($uri);
+    $fetch->http_status($res->code);
+    $fetch->http_response($res);
     if ($res->previous && $res->previous->code == HTTP::Status::RC_MOVED_PERMANENTLY()) {
-        $feed->status(URI_MOVED_PERMANENTLY);
-        $feed->uri($res->previous->header('Location'));
+        $fetch->status(URI_MOVED_PERMANENTLY);
+        $fetch->uri($res->previous->header('Location'));
     } elsif ($res->code == HTTP::Status::RC_GONE()) {
-        $feed->status(URI_GONE);
-        $feed->uri(undef);
-        return $feed;
+        $fetch->status(URI_GONE);
+        $fetch->uri(undef);
+        return $fetch;
     } elsif ($res->code == HTTP::Status::RC_NOT_MODIFIED()) {
-        $feed->status(URI_NOT_MODIFIED);
-        $feed->content($ref->{Content});
-        $feed->etag($ref->{ETag});
-        $feed->last_modified($ref->{LastModified});
-        return $feed;
+        $fetch->status(URI_NOT_MODIFIED);
+        $fetch->content($ref->{Content});
+        $fetch->etag($ref->{ETag});
+        $fetch->last_modified($ref->{LastModified});
+        return $fetch;
     } elsif (!$res->is_success) {
         return $class->error($res->message);
     } else {
-        $feed->status(URI_OK);
+        $fetch->status(URI_OK);
     }
-    $feed->last_modified($res->last_modified);
-    $feed->etag($res->header('ETag'));
+    $fetch->last_modified($res->last_modified);
+    $fetch->etag($res->header('ETag'));
     my $content = $res->content;
     if ($res->content_encoding && $res->content_encoding eq 'gzip') {
         $content = Compress::Zlib::memGunzip($content);
@@ -93,16 +110,21 @@ sub fetch {
         $content_hook->(\$content);
     }
 
-    $feed->content($content);
+    $fetch->content($content);
 
-    if ($cache) {
+    # cache by default, if there's a cache.  but let callers cancel
+    # the cache action by defining a cache grep hook
+    if ($cache &&
+        ($p_cache_grep ? $p_cache_grep->($fetch) : 1)) {
+
         $cache->set($uri, Storable::freeze({
-            ETag         => $feed->etag,
-            LastModified => $feed->last_modified,
-            Content      => $feed->content,
+            ETag         => $fetch->etag,
+            LastModified => $fetch->last_modified,
+            Content      => $fetch->content,
+            CacheTime    => time(),
         }));
     }
-    $feed;
+    $fetch;
 }
 
 1;
@@ -110,7 +132,7 @@ __END__
 
 =head1 NAME
 
-URI::Fetch - Smart URI fetching (for syndication feeds, in particular)
+URI::Fetch - Smart URI fetching/caching
 
 =head1 SYNOPSIS
 
@@ -136,8 +158,9 @@ URI::Fetch - Smart URI fetching (for syndication feeds, in particular)
 
 =head1 DESCRIPTION
 
-I<URI::Fetch> is a smart client for fetching syndication feeds (RSS, Atom,
-and others) in an intelligent, bandwidth- and time-saving way. That means:
+I<URI::Fetch> is a smart client for fetching HTTP pages, notably
+syndication feeds (RSS, Atom, and others), in an intelligent,
+bandwidth- and time-saving way. That means:
 
 =over 4
 
@@ -151,7 +174,7 @@ time).
 
 If you use a local cache (see the I<Cache> parameter to I<fetch>),
 I<URI::Fetch> will keep track of the I<Last-Modified> and I<ETag> headers
-from the server, allowing you to only download feeds that have been
+from the server, allowing you to only download pages that have been
 modified since the last time you checked.
 
 =item * Proper understanding of HTTP error codes
@@ -168,13 +191,13 @@ special handling of 2 codes:
 
 =item * 304 (Moved Permanently)
 
-Signals that a feed has moved permanently, and that your database of feeds
-should be updated to reflect the new URI.
+Signals that a page/feed has moved permanently, and that your database
+of feeds should be updated to reflect the new URI.
 
 =item * 410 (Gone)
 
-Signals that a feed is gone and will never be coming back, and should be
-removed from your database of feeds (or whatever you're using).
+Signals that a page is gone and will never be coming back, so you should
+stop trying to fetch it.
 
 =back
 
@@ -182,7 +205,7 @@ removed from your database of feeds (or whatever you're using).
 
 =head2 URI::Fetch->fetch($uri, %param)
 
-Fetches a syndication feed identified by the URI I<$uri>.
+Fetches a page identified by the URI I<$uri>.
 
 On success, returns a I<URI::Fetch::Response> object; on failure, returns
 C<undef>.
@@ -196,7 +219,7 @@ I<%param> can contain:
 =item * ETag
 
 I<LastModified> and I<ETag> can be supplied to force the server to only
-return the full feed if it's changed since the last request. If you're
+return the full page if it's changed since the last request. If you're
 writing your own feed client, this is recommended practice, because it
 limits both your bandwidth use and the server's.
 
@@ -210,9 +233,9 @@ the I<Cache> parameter with an object supporting the L<Cache> API (e.g.
 I<Cache::File>, I<Cache::Memory>). Specifically, an object that supports
 C<$cache-E<gt>get($key)> and C<$cache-E<gt>set($key, $value, $expires)>.
 
-If supplied, I<URI::Fetch> will store the feed content, ETag, and
+If supplied, I<URI::Fetch> will store the page content, ETag, and
 last-modified time of the response in the cache, and will pull the
-content from the cache on subsequent requests if the feed returns a
+content from the cache on subsequent requests if the page returns a
 Not-Modified response.
 
 =item * UserAgent
@@ -220,6 +243,38 @@ Not-Modified response.
 Optional.  You may provide your own LWP::UserAgent instance.  Look
 into L<LWPx::ParanoidUserAgent> if you're fetching URLs given to you
 by possibly malicious parties.
+
+=item * NoNetwork
+
+Optional.  Controls the interaction between the cache and HTTP
+requests with If-Modified-Since/If-None-Match headers.  Possible
+behaviors are:
+
+=over
+
+=item false (default)
+
+If a page is in the cache, the origin HTTP server is always checked
+for a fresher copy with an If-Modified-Since and/or If-None-Match
+header.
+
+=item C<1>
+
+If set to C<1>, the origin HTTP is never contacted, regardless of the
+page being in cache or not.  If the page is missing from cache, the
+fetch method will return undef.  If the page is in cache, that page
+will be returned, no matter how old it is.  Note that setting this
+option means the L<URI::Fetch::Response> object will never have the
+http_response member set.
+
+=item C<N>, where N E<gt> 1
+
+The origin HTTP server is not contacted B<if> the page is in cache
+B<and> the cached page was inserted in the last N seconds.  If the
+cached copy is older than N seconds, a normal HTTP request (full or
+cache check) is done.
+
+=back
 
 =item * ContentAlterHook
 
@@ -233,6 +288,13 @@ pre-parsed version of it.  If you modify the scalarref given to your
 hook and change it into a hashref, scalarref, or some blessed object,
 that same value will be returned to you later on not-modified
 responses.
+
+=item * CacheEntryGrep
+
+Optional.  A subref that gets called with the I<URI::Fetch::Response>
+object about to be cached (with the contents already possibly transformed by
+your C<ContentAlterHook>).  If your subref returns true, the page goes
+into the cache.  If false, it doesn't.
 
 =back
 

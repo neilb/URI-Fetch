@@ -1,6 +1,14 @@
-# $Id: Changes 1835 2005-05-25 22:52:11Z btrott $
+# $Id: Changes 1849 2005-05-27 22:52:01Z btrott $
 
 Revision history for URI::Fetch
+
+0.03  2005.05.27
+    - Added a NoNetwork option, allowing fetch to trust the cache completely
+      and skip the HTTP request; or the option to do this only if the version
+      in the cache is older than N seconds. [bradfitz]
+    - Added a CacheEntryGrep option, to allow for not caching certain
+      responses. [bradfitz]
+    - Documentation fixes & clarifications. [bradfitz]
 
 0.02  2005.05.25
     - Let the caller pass in their own UserAgent and ContentAlterHook.

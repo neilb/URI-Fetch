@@ -1,7 +1,7 @@
-# $Id: 01-fetch.t 1835 2005-05-25 22:52:11Z btrott $
+# $Id: 01-fetch.t 1850 2005-05-27 22:52:44Z btrott $
 
 use strict;
-use Test::More tests => 47;
+use Test::More tests => 70;
 use URI::Fetch;
 
 use constant BASE      => 'http://stupidfool.org/perl/feeds/';
@@ -94,6 +94,59 @@ $res = URI::Fetch->fetch(URI_OK, Cache => $cache);
 ok($res);
 is($res->http_status, 304);
 is($res->content, "ALTERED.");
+
+## Test NoNetwork, wiping the cache
+$cache = My::Cache->new;
+
+## Content is not in cache, fetch should return undef
+$res = URI::Fetch->fetch(URI_OK, Cache => $cache, NoNetwork => 1);
+is($res, undef);
+
+## Put the content in the cache.
+$res = URI::Fetch->fetch(URI_OK, Cache => $cache);
+ok($res);
+is($res->http_status, 200);
+ok($xml = $res->content);
+$res = URI::Fetch->fetch(URI_OK, Cache => $cache, NoNetwork => 1);
+ok($res);
+is($res->status, URI::Fetch::URI_OK());
+is($res->content, $xml);
+ok(!$res->http_status);   ## No http_status or http_response, because
+ok(!$res->http_response); ## we skipped the HTTP request entirely.
+
+## Now sleep for 5 seconds, and try to get the content from the cache
+## without a network connection, if the cached content is younger than
+## 10 seconds. This should work.
+sleep 5;
+$res = URI::Fetch->fetch(URI_OK, Cache => $cache, NoNetwork => 10);
+ok($res);
+is($res->status, URI::Fetch::URI_OK());
+is($res->content, $xml);
+ok(!$res->http_status);   ## No http_status or http_response, because
+ok(!$res->http_response); ## we skipped the HTTP request entirely.
+
+## Now try to get the content from the cache, but only if it is younger
+## than 2 seconds. It is not, so we should make a full HTTP response
+## with Etag and Last-modified, and get back a 304.
+$res = URI::Fetch->fetch(URI_OK, Cache => $cache, NoNetwork => 2);
+ok($res);
+is($res->status, URI::Fetch::URI_NOT_MODIFIED());
+is($res->http_status, 304);
+ok($res->http_response);
+is($res->content, $xml);
+
+## Test CacheEntryGrep.
+$cache = My::Cache->new;
+$res = URI::Fetch->fetch(URI_OK, Cache => $cache, CacheEntryGrep => sub {
+    my($fetch) = @_;
+    $fetch->uri ne URI_OK; ## Do not cache this URI.
+});
+ok($res);
+is($res->http_status, 200);
+## Make sure the content was not cached (it would be 304 if it were).
+$res = URI::Fetch->fetch(URI_OK, Cache => $cache);
+ok($res);
+is($res->http_status, 200);
 
 package My::Cache;
 sub new { bless {}, shift }
