@@ -1,6 +1,11 @@
-# $Id: Changes 1849 2005-05-27 22:52:01Z btrott $
+# $Id: Changes 1877 2005-10-10 05:37:24Z btrott $
 
 Revision history for URI::Fetch
+
+0.04  2005.10.09
+    - Added Thaw and Freeze options, which allow you to define the
+      serialization and deserialization options that are used. Thanks to
+      Tim Appnel for the patch.
 
 0.03  2005.05.27
     - Added a NoNetwork option, allowing fetch to trust the cache completely

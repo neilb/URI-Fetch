@@ -1,4 +1,4 @@
-# $Id: Fetch.pm 1849 2005-05-27 22:52:01Z btrott $
+# $Id: Fetch.pm 1864 2005-08-05 06:09:48Z btrott $
 
 package URI::Fetch;
 use strict;
@@ -8,9 +8,8 @@ use LWP::UserAgent;
 use Carp qw( croak );
 use URI;
 use URI::Fetch::Response;
-use Storable;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 our $HAS_ZLIB;
 BEGIN {
@@ -34,12 +33,21 @@ sub fetch {
     my $content_hook = delete $param{ContentAlterHook};
     my $p_no_net     = delete $param{NoNetwork};
     my $p_cache_grep = delete $param{CacheEntryGrep};
+    my $freeze       = delete $param{Freeze};
+    my $thaw         = delete $param{Thaw};
     croak("Unknown parameters: " . join(", ", keys %param))
         if %param;
 
     my $ref;
-    if ($cache && (my $blob = $cache->get($uri))) {
-        $ref = Storable::thaw($blob);
+    if ($cache) {
+        unless ($freeze && $thaw) {
+            require Storable;
+            $thaw = \&Storable::thaw;
+            $freeze = \&Storable::freeze;
+        }
+        if (my $blob = $cache->get($uri)) {
+            $ref = $thaw->($blob);
+        }
     }
 
     # NoNetwork support (see pod docs below for logic clarification)
@@ -117,7 +125,7 @@ sub fetch {
     if ($cache &&
         ($p_cache_grep ? $p_cache_grep->($fetch) : 1)) {
 
-        $cache->set($uri, Storable::freeze({
+        $cache->set($uri, $freeze->({
             ETag         => $fetch->etag,
             LastModified => $fetch->last_modified,
             Content      => $fetch->content,
@@ -295,6 +303,21 @@ Optional.  A subref that gets called with the I<URI::Fetch::Response>
 object about to be cached (with the contents already possibly transformed by
 your C<ContentAlterHook>).  If your subref returns true, the page goes
 into the cache.  If false, it doesn't.
+
+=item * Freeze
+
+=item * Thaw
+
+Optional. Subrefs that get called to serialize and deserialize, respectively,
+the data that will be cached. The cached data should be assumed to be an
+arbitrary Perl data structure, containing (potentially) references to
+arrays, hashes, etc.
+
+Freeze should serialize the structure into a scalar; Thaw should
+deserialize the scalar into a data structure.
+
+By default, I<Storable> will be used for freezing and thawing the cached
+data structure.
 
 =back
 

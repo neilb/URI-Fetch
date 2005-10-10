@@ -20,3 +20,4 @@ META.yml
 README
 t/00-compile.t
 t/01-fetch.t
+t/02-freezethaw.t
