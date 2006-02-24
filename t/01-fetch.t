@@ -1,7 +1,7 @@
-# $Id: 01-fetch.t 1850 2005-05-27 22:52:44Z btrott $
+# $Id: 01-fetch.t 1918 2006-02-24 21:18:37Z btrott $
 
 use strict;
-use Test::More tests => 70;
+use Test::More tests => 73;
 use URI::Fetch;
 
 use constant BASE      => 'http://stupidfool.org/perl/feeds/';
@@ -79,6 +79,12 @@ is($res->http_status, 410);
 $res = URI::Fetch->fetch(URI_ERROR);
 ok(!$res);
 ok(URI::Fetch->errstr);
+
+## Test ForceResponse.
+$res = URI::Fetch->fetch(URI_ERROR, ForceResponse => 1);
+isa_ok $res, 'URI::Fetch::Response';
+is $res->http_status, 404;
+ok $res->http_response;
 
 ## Test ContentAlterHook, wiping the cache
 $cache = My::Cache->new;

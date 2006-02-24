@@ -1,6 +1,11 @@
-# $Id: Changes 1877 2005-10-10 05:37:24Z btrott $
+# $Id: Changes 1918 2006-02-24 21:18:37Z btrott $
 
 Revision history for URI::Fetch
+
+0.05  2006.02.24
+    - Added a ForceResponse option, which forces URI::Fetch->fetch to return
+      a URI::Fetch::Response object even if the HTTP request fails for an
+      unknown reason. Thanks to Tim Appnel for the patch.
 
 0.04  2005.10.09
     - Added Thaw and Freeze options, which allow you to define the
