@@ -1,4 +1,4 @@
-# $Id: Response.pm 1745 2005-01-01 00:39:49Z btrott $
+# $Id: Response.pm 1930 2006-04-10 01:54:28Z btrott $
 
 package URI::Fetch::Response;
 use strict;
@@ -23,6 +23,11 @@ sub etag          { shift->_var('etag',          @_) }
 sub last_modified { shift->_var('last_modified', @_) }
 sub uri           { shift->_var('uri',           @_) }
 sub content       { shift->_var('content',       @_) }
+sub content_type  { shift->_var('content_type',  @_) }
+
+sub is_success  { $_[0]->http_response->is_success  }
+sub is_redirect { $_[0]->http_response->is_redirect }
+sub is_error    { $_[0]->http_response->is_error    }
 
 1;
 __END__
@@ -87,6 +92,19 @@ The HTTP status code from the response.
 =head2 $res->http_response
 
 The I<HTTP::Response> object returned from the fetch.
+
+=head2 $res->is_success
+
+=head2 $res->is_redirect
+
+=head2 $res->is_error
+
+Wrappers around the C<$res-E<gt>response> methods of the same name, for
+convenience.
+
+=head2 $res->content_type
+
+The Content-Type header from the response.
 
 =head1 AUTHOR & COPYRIGHT
 

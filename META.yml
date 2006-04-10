@@ -1,19 +1,20 @@
-name: URI-Fetch
-version: 0.05
 abstract: Smart URI fetching/caching
 author: Benjamin Trott <ben+cpan@stupidfool.org>
-license: perl
 distribution_type: module
-requires:
-  Class::ErrorHandler: 0
-  LWP: 0
-  URI: 0
-  Storable: 0
-recommends:
-  Compress::Zlib: 0
-  Cache: 0
+generated_by: Module::Install version 0.57
+license: perl
+name: URI-Fetch
 no_index:
   directory:
     - t
     - inc
-generated_by: Module::Install version 0.36
+    - t
+recommends:
+  Cache: 0
+  Compress::Zlib: 0
+requires:
+  Class::ErrorHandler: 0
+  LWP: 0
+  Storable: 0
+  URI: 0
+version: 0.06

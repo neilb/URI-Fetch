@@ -1,6 +1,15 @@
-# $Id: Changes 1918 2006-02-24 21:18:37Z btrott $
+# $Id: Changes 1930 2006-04-10 01:54:28Z btrott $
 
 Revision history for URI::Fetch
+
+0.06  2006.04.09
+    - Fixed issue where content-type was not stored in the cache, and was
+      thus blank on subsequent requests. Thanks to Tatsuhiko Miyagawa for
+      the patch.
+    - Fixed issue with caching redirected (304) URIs. Thanks to Tatsuhiko
+      Miyagawa for the patch.
+    - Added is_error, is_redirect, is_success convenience methods to
+      URI::Fetch::Response. Thanks to Tatsuhiko Miyagawa for the patch.
 
 0.05  2006.02.24
     - Added a ForceResponse option, which forces URI::Fetch->fetch to return
