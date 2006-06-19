@@ -1,7 +1,7 @@
-# $Id: 01-fetch.t 1918 2006-02-24 21:18:37Z btrott $
+# $Id: 01-fetch.t 1941 2006-06-19 03:03:44Z btrott $
 
 use strict;
-use Test::More tests => 73;
+use Test::More tests => 76;
 use URI::Fetch;
 
 use constant BASE      => 'http://stupidfool.org/perl/feeds/';
@@ -119,6 +119,9 @@ is($res->status, URI::Fetch::URI_OK());
 is($res->content, $xml);
 ok(!$res->http_status);   ## No http_status or http_response, because
 ok(!$res->http_response); ## we skipped the HTTP request entirely.
+ok($res->is_success); ## but still is_* should work
+ok(!$res->is_error);
+ok(!$res->is_redirect);
 
 ## Now sleep for 5 seconds, and try to get the content from the cache
 ## without a network connection, if the cached content is younger than

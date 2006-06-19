@@ -1,6 +1,15 @@
-# $Id: Changes 1930 2006-04-10 01:54:28Z btrott $
+# $Id: Changes 1941 2006-06-19 03:03:44Z btrott $
 
 Revision history for URI::Fetch
+
+0.07  2006.06.18
+    - Use $res->header('Content-Type') instead of $res->content_type, since
+      the latter can return an array. Thanks to Tatsuhiko Miyagawa for the
+      patch.
+    - $res->is_success, is_error, and is_redirect previously threw an exception
+      when called with NoNetwork. They just work as 200 succesful request now,
+      when the response is taken back from the cache. Thanks to Tatsuhiko
+      Miyagawa for the patch.
 
 0.06  2006.04.09
     - Fixed issue where content-type was not stored in the cache, and was

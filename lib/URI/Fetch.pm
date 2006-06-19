@@ -1,4 +1,4 @@
-# $Id: Fetch.pm 1930 2006-04-10 01:54:28Z btrott $
+# $Id: Fetch.pm 1941 2006-06-19 03:03:44Z btrott $
 
 package URI::Fetch;
 use strict;
@@ -9,7 +9,7 @@ use Carp qw( croak );
 use URI;
 use URI::Fetch::Response;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 our $HAS_ZLIB;
 BEGIN {
@@ -86,7 +86,7 @@ sub fetch {
     $fetch->uri($uri);
     $fetch->http_status($res->code);
     $fetch->http_response($res);
-    $fetch->content_type($res->content_type);
+    $fetch->content_type($res->header('Content-Type'));
     if ($res->previous && $res->previous->code == HTTP::Status::RC_MOVED_PERMANENTLY()) {
         $fetch->status(URI_MOVED_PERMANENTLY);
         $fetch->uri($res->previous->header('Location'));

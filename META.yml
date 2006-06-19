@@ -1,7 +1,7 @@
 abstract: Smart URI fetching/caching
 author: Benjamin Trott <ben+cpan@stupidfool.org>
 distribution_type: module
-generated_by: Module::Install version 0.57
+generated_by: Module::Install version 0.61
 license: perl
 name: URI-Fetch
 no_index:
@@ -17,4 +17,4 @@ requires:
   LWP: 0
   Storable: 0
   URI: 0
-version: 0.06
+version: 0.07
