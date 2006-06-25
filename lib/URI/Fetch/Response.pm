@@ -1,4 +1,4 @@
-# $Id: Response.pm 1941 2006-06-19 03:03:44Z btrott $
+# $Id: Response.pm 1943 2006-06-25 18:59:50Z btrott $
 
 package URI::Fetch::Response;
 use strict;
@@ -39,7 +39,7 @@ sub is_redirect {
 
 sub is_error    {
     my $response = shift;
-    return $response->http_response->is_redirect if $response->http_response;
+    return $response->http_response->is_error if $response->http_response;
     return;
 }
 

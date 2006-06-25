@@ -1,6 +1,10 @@
-# $Id: Changes 1941 2006-06-19 03:03:44Z btrott $
+# $Id: Changes 1943 2006-06-25 18:59:50Z btrott $
 
 Revision history for URI::Fetch
+
+0.071 2006.06.25
+    - Fixed broken is_error (broken in 0.07). Thanks to Tatsuhiko for the
+      patch.
 
 0.07  2006.06.18
     - Use $res->header('Content-Type') instead of $res->content_type, since
