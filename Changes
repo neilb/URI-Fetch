@@ -1,6 +1,11 @@
-# $Id: Changes 1943 2006-06-25 18:59:50Z btrott $
+# $Id: Changes 1952 2006-07-25 05:41:24Z btrott $
 
 Revision history for URI::Fetch
+
+0.08  2006.07.24
+    - Don't overwrite the User-Agent field if the caller has set it and
+      provided the UserAgent argument. Thanks to Tatsuhiko Miyagawa
+      for the patch.
 
 0.071 2006.06.25
     - Fixed broken is_error (broken in 0.07). Thanks to Tatsuhiko for the

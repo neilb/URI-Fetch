@@ -1,4 +1,4 @@
-# $Id: Fetch.pm 1943 2006-06-25 18:59:50Z btrott $
+# $Id: Fetch.pm 1952 2006-07-25 05:41:24Z btrott $
 
 package URI::Fetch;
 use strict;
@@ -9,7 +9,7 @@ use Carp qw( croak );
 use URI;
 use URI::Fetch::Response;
 
-our $VERSION = '0.071';
+our $VERSION = '0.08';
 
 our $HAS_ZLIB;
 BEGIN {
@@ -68,7 +68,8 @@ sub fetch {
     }
 
     $ua ||= LWP::UserAgent->new;
-    $ua->agent(join '/', $class, $class->VERSION);
+    $ua->agent(join '/', $class, $class->VERSION)
+        if $ua->agent =~ /^libwww-perl/;
 
     my $req = HTTP::Request->new(GET => $uri);
     if ($HAS_ZLIB) {
