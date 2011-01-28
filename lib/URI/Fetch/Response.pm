@@ -1,5 +1,3 @@
-# $Id: Response.pm 1943 2006-06-25 18:59:50Z btrott $
-
 package URI::Fetch::Response;
 use strict;
 

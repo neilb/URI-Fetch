@@ -1,6 +1,10 @@
-# $Id: Changes 1952 2006-07-25 05:41:24Z btrott $
-
 Revision history for URI::Fetch
+
+0.09  2011.01.28
+    - Removed sign() and auto_install() from Makefile.PL.
+    - Removed magic svn keywords.
+    - Added author tests (xt/) and modified SYNOPSIS for all modules to
+      make them pass the compilation test.
 
 0.08  2006.07.24
     - Don't overwrite the User-Agent field if the caller has set it and

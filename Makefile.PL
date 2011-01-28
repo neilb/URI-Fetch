@@ -1,35 +1,18 @@
-# $Id: Makefile.PL 1835 2005-05-25 22:52:11Z btrott $
-
 use inc::Module::Install;
+name 'URI-Fetch';
+all_from 'lib/URI/Fetch.pm';
+readme_from 'lib/URI/Fetch.pm';
 
-name('URI-Fetch');
-abstract('Smart URI fetching/caching');
-author('Benjamin Trott <ben+cpan@stupidfool.org>');
-version_from('lib/URI/Fetch.pm');
-license('perl');
-no_index(directory => 't');
-sign(1);
+requires 'Class::ErrorHandler';
+requires 'LWP';
+requires 'URI';
+requires 'Storable';
+requires 'Compress::Zlib';
 
-include('ExtUtils::AutoInstall');
+test_requires 'Test::More';
 
-requires('Class::ErrorHandler');
-requires('LWP');
-requires('URI');
-requires('Storable'),
-
-features(
-    'GZIP Support' => [
-        -default => 1,
-        recommends('Compress::Zlib'),
-    ],
-
-    'Caching Support' => [
-        -default => 0,
-        recommends('Cache'),
-    ],
-);
-
-auto_include();
-auto_install();
-
-&WriteAll;
+use_test_base;
+auto_include_deps;
+author_tests('xt');
+auto_set_repository;
+WriteAll;

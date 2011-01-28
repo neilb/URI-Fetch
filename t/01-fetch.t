@@ -1,5 +1,3 @@
-# $Id: 01-fetch.t 1941 2006-06-19 03:03:44Z btrott $
-
 use strict;
 use Test::More tests => 76;
 use URI::Fetch;
