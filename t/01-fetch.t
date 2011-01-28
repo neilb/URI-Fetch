@@ -1,5 +1,12 @@
 use strict;
-use Test::More tests => 76;
+use Test::More;
+
+unless ( online() ) {
+    plan skip_all => 'Network access required for tests';
+}
+
+plan tests => 76;
+
 use URI::Fetch;
 
 use constant BASE      => 'http://stupidfool.org/perl/feeds/';
@@ -154,6 +161,12 @@ is($res->http_status, 200);
 $res = URI::Fetch->fetch(URI_OK, Cache => $cache);
 ok($res);
 is($res->http_status, 200);
+
+sub online {
+    my $ua = LWP::UserAgent->new( env_proxy => 1, timeout => 30 );
+    my $res = $ua->get( 'http://google.com/' );
+    return $res->is_success ? 1 : 0;
+}
 
 package My::Cache;
 sub new { bless {}, shift }

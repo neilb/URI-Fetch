@@ -1,7 +1,12 @@
-#!/usr/bin/perl -w
 use strict;
+use Test::More;
 
-use Test::More tests => 11;
+unless ( online() ) {
+    plan skip_all => 'Network access required for tests';
+}
+
+plan tests => 11;
+
 use URI::Fetch;
 use Data::Dumper;
 
@@ -40,6 +45,12 @@ sub thaw {
     my $data; 
     eval shift;     # string from previous data dump
     $data;
+}
+
+sub online {
+    my $ua = LWP::UserAgent->new( env_proxy => 1, timeout => 30 );
+    my $res = $ua->get( 'http://google.com/' );
+    return $res->is_success ? 1 : 0;
 }
 
 #--- simple in memory cache object
