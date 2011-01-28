@@ -67,9 +67,12 @@ sub fetch {
         return undef if $p_no_net == 1;
     }
 
-    $ua ||= LWP::UserAgent->new;
-    $ua->agent(join '/', $class, $class->VERSION)
-        if $ua->agent =~ /^libwww-perl/;
+    $ua ||= do {
+        my $ua = LWP::UserAgent->new;
+        $ua->agent(join '/', $class, $class->VERSION);
+        $ua->env_proxy;
+        $ua;
+    };
 
     my $req = HTTP::Request->new(GET => $uri);
     if ($HAS_ZLIB) {

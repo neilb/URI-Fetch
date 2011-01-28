@@ -1,6 +1,7 @@
 Revision history for URI::Fetch
 
 0.09  2011.01.28
+    - Use $ua->env_proxy to load local proxy settings. (RT 53819)
     - Removed sign() and auto_install() from Makefile.PL.
     - Removed magic svn keywords.
     - Added author tests (xt/) and modified SYNOPSIS for all modules to
