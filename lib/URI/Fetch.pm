@@ -134,7 +134,7 @@ sub fetch {
     if ($cache &&
         ($p_cache_grep ? $p_cache_grep->($fetch) : 1)) {
 
-        $cache->set($fetch->uri, $freeze->({
+        $cache->set($uri, $freeze->({
             ETag         => $fetch->etag,
             LastModified => $fetch->last_modified,
             Content      => $fetch->content,

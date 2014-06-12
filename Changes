@@ -1,6 +1,8 @@
 Revision history for Perl module URI::Fetch
 
 0.09_01 2014-06-13
+    - Caching now done under the original url rather than the sanitised
+      version of it. Bug report and patch from Mario Domgoergen RT#39820
     - Switched to Dist::Zilla
     - Reformatted Changes as per CPAN::Changes::Spec
 
