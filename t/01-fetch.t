@@ -5,7 +5,7 @@ unless ( online() ) {
     plan skip_all => 'Network access required for tests';
 }
 
-plan tests => 76;
+plan tests => 80;
 
 use URI::Fetch;
 
@@ -33,6 +33,7 @@ ok($res);
 is($res->http_status, 304);
 is($res->status, URI::Fetch::URI_NOT_MODIFIED());
 is($res->content, undef);
+ok(!$res->is_success);
 
 ## Test a fetch using etag.
 $res = URI::Fetch->fetch(URI_OK, ETag => $etag);
@@ -40,6 +41,7 @@ ok($res);
 is($res->http_status, 304);
 is($res->status, URI::Fetch::URI_NOT_MODIFIED());
 is($res->content, undef);
+ok(!$res->is_success);
 
 ## Test a fetch using both.
 $res = URI::Fetch->fetch(URI_OK, ETag => $etag, LastModified => $mtime);
@@ -47,6 +49,7 @@ ok($res);
 is($res->http_status, 304);
 is($res->status, URI::Fetch::URI_NOT_MODIFIED());
 is($res->content, undef);
+ok(!$res->is_success);
 
 ## Test a regular fetch using a cache.
 my $cache = My::Cache->new;
@@ -65,6 +68,7 @@ is($res->http_status, 304);
 is($res->status, URI::Fetch::URI_NOT_MODIFIED());
 is($res->etag, $etag);
 is($res->last_modified, $mtime);
+ok($res->is_success);
 is($res->content, $xml);
 
 ## Test fetch of "moved permanently" resouce.

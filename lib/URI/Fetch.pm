@@ -159,6 +159,7 @@ URI::Fetch - Smart URI fetching/caching
     ## Simple fetch.
     my $res = URI::Fetch->fetch('http://example.com/atom.xml')
         or die URI::Fetch->errstr;
+    do_something($res->content) if $res->is_success;
 
     ## Fetch using specified ETag and Last-Modified headers.
     $res = URI::Fetch->fetch('http://example.com/atom.xml',
@@ -231,6 +232,16 @@ so you should stop trying to fetch it.
 =back
 
 =back
+
+=head2 Change from 0.09
+
+If you make a request using a cache and get back a 304 response code
+(Not Modified), then if the content was returned from the cache,
+then C<is_success()> will return true, and C<$response-E<gt>content>
+will contain the cached content.
+
+I think this is the right behaviour, given the philosophy of C<URI::Fetch>,
+but please let me (NEILB) know if you disagree.
 
 =head1 USAGE
 

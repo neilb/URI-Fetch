@@ -1,6 +1,9 @@
 Revision history for Perl module URI::Fetch
 
 0.09_01 2014-06-13
+    - If you've got caching enabled, and get a 304 response (Not Modified)
+      with content (from the cache), then is_success() returns true.
+      Suggested in RT#75665
     - Caching now done under the original url rather than the sanitised
       version of it. Bug report and patch from Mario Domgoergen RT#39820
     - Switched to Dist::Zilla
