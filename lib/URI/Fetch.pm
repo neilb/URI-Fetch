@@ -1,6 +1,8 @@
 package URI::Fetch;
-use strict;
+
 use 5.008_001;
+use strict;
+use warnings;
 
 use base qw( Class::ErrorHandler );
 
@@ -8,8 +10,6 @@ use LWP::UserAgent;
 use Carp qw( croak );
 use URI;
 use URI::Fetch::Response;
-
-our $VERSION = '0.09';
 
 our $HAS_ZLIB;
 BEGIN {

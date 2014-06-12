@@ -1,5 +1,7 @@
 package URI::Fetch::Response;
+
 use strict;
+use warnings;
 
 sub new {
     my $class = shift;

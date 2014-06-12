@@ -1,6 +1,7 @@
 Revision history for Perl module URI::Fetch
 
 0.09_01 2014-06-13
+    - Switched to Dist::Zilla
     - Reformatted Changes as per CPAN::Changes::Spec
 
 0.09  2011-01-28
