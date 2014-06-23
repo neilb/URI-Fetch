@@ -2,6 +2,7 @@ Revision history for Perl module URI::Fetch
 
 0.10 2014-06-23
     - CPAN Testers looking good after previous developer release.
+    - Added github repo to pod
 
 0.09_01 2014-06-13
     - If you've got caching enabled, and get a 304 response (Not Modified)

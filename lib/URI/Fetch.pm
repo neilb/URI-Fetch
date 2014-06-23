@@ -364,6 +364,10 @@ using the C<errstr> method on the class.
 
 =back
 
+=head1 REPOSITORY
+
+L<https://github.com/neilbowers/URI-Fetch>
+
 =head1 LICENSE
 
 I<URI::Fetch> is free software; you may redistribute it and/or modify it
