@@ -1,5 +1,9 @@
 Revision history for Perl module URI::Fetch
 
+0.11 2015-07-04 NEILB
+    - Added [MetaJSON] to dist.ini, so release will include META.json.
+      RT#105632 from ETHER++
+
 0.10 2014-06-23
     - CPAN Testers looking good after previous developer release.
     - Added github repo to pod
