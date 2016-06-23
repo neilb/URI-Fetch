@@ -378,4 +378,27 @@ under the same terms as Perl itself.
 Except where otherwise noted, I<URI::Fetch> is Copyright 2004 Benjamin
 Trott, ben+cpan@stupidfool.org. All rights reserved.
 
+Currently maintained by Neil Bowers.
+
+=head1 CONTRIBUTORS
+
+=over 4
+
+=item * Tim Appnel
+
+=item * Mario Domgoergen
+
+=item * Karen Etheridge
+
+=item * Brad Fitzpatrick
+
+=item * Jason Hall
+
+=item * Naoya Ito
+
+=item * Tatsuhiko Miyagawa
+
+=back
+
 =cut
+
