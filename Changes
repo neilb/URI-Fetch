@@ -1,5 +1,10 @@
 Revision history for Perl module URI::Fetch
 
+0.13 2016-07-02 NEILB
+    - Switched to using Test::RequiresInternet rather than the hand-rolled
+      online() function that was duplicated in 2 tests. Plus it was testing
+      whether google.com was contactable, and not the site used in the tests.
+
 0.12 2016-06-23 NEILB
     - Travis support added by Jason Hall.
     - Added list of contributors to the doc.
