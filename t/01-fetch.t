@@ -1,9 +1,6 @@
 use strict;
 use Test::More;
-
-unless ( online() ) {
-    plan skip_all => 'Network access required for tests';
-}
+use Test::RequiresInternet 'stupidfool.org' => 80;
 
 plan tests => 80;
 
@@ -165,12 +162,6 @@ is($res->http_status, 200);
 $res = URI::Fetch->fetch(URI_OK, Cache => $cache);
 ok($res);
 is($res->http_status, 200);
-
-sub online {
-    my $ua = LWP::UserAgent->new( env_proxy => 1, timeout => 30 );
-    my $res = $ua->get( 'http://google.com/' );
-    return $res->is_success ? 1 : 0;
-}
 
 package My::Cache;
 sub new { bless {}, shift }
