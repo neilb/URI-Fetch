@@ -1,5 +1,9 @@
 Revision history for Perl module URI::Fetch
 
+0.13_01 2021-05-25 NEILB
+    - Changed the test suite to use some online HTTP status code test servers.
+      Let's see how reliable they are.
+
 0.13 2016-07-02 NEILB
     - Switched to using Test::RequiresInternet rather than the hand-rolled
       online() function that was duplicated in 2 tests. Plus it was testing

@@ -1,16 +1,11 @@
 use strict;
 use Test::More;
-
-unless ( online() ) {
-    plan skip_all => 'Network access required for tests';
-}
-
-plan tests => 11;
+use Test::RequiresInternet 0.05 'httpstatuses.com' => 443;
 
 use URI::Fetch;
 use Data::Dumper;
 
-use constant URI_OK    => 'http://stupidfool.org/perl/feeds/ok.xml';
+use constant URI_OK    => 'https://httpstatuses.com/200';
 
 my($res, $xml, $etag, $mtime);
 
@@ -19,7 +14,7 @@ my $cache = My::Cache->new;
 $res = URI::Fetch->fetch(URI_OK, Cache => $cache, Freeze=>\&freeze, Thaw=>\&thaw);
 ok($res);
 is($res->http_status, 200);
-ok($etag = $res->etag);
+# ok($etag = $res->etag);
 ok($mtime = $res->last_modified);
 ok($xml = $res->content);
 
@@ -33,6 +28,9 @@ is($res->etag, $etag);
 is($res->last_modified, $mtime);
 is($res->content, $xml);
 
+done_testing();
+
+
 #--- alternate freeze/thaw routine
 
 sub freeze {
@@ -45,12 +43,6 @@ sub thaw {
     my $data; 
     eval shift;     # string from previous data dump
     $data;
-}
-
-sub online {
-    my $ua = LWP::UserAgent->new( env_proxy => 1, timeout => 30 );
-    my $res = $ua->get( 'http://google.com/' );
-    return $res->is_success ? 1 : 0;
 }
 
 #--- simple in memory cache object
