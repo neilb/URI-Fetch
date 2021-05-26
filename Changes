@@ -1,5 +1,10 @@
 Revision history for Perl module URI::Fetch
 
+0.14 2021-05-26 NEILB
+    - When Benjamin created this, he had a server set up for doing the
+      tests, but that's gone now. So to stop all the fails, I'm skipping
+      the live tests for now. Could do with mocking, but this is a stop-gap.
+
 0.13_01 2021-05-25 NEILB
     - Changed the test suite to use some online HTTP status code test servers.
       Let's see how reliable they are.

@@ -1,5 +1,5 @@
 use strict;
-use Test::More;
+use Test::More skip_all => "these are not the tests you're looking for";
 use Test::RequiresInternet 0.05 'httpstatuses.com' => 443;
 
 use URI::Fetch;
